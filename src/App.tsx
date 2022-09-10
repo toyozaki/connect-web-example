@@ -3,11 +3,14 @@ import {
   codeFromString,
   codeToString,
   ConnectError,
+  decodeBinaryHeader,
+  encodeBinaryHeader,
 } from "@bufbuild/connect-web";
 import { useState } from "react";
 import "./App.css";
 
 import { ElizaService } from "./gen/buf/connect/demo/eliza/v1/eliza_connectweb";
+import { SayRequest } from "./gen/buf/connect/demo/eliza/v1/eliza_pb";
 import { useClient } from "./hooks/useClient";
 
 function App() {
@@ -53,9 +56,37 @@ function App() {
     ]);
 
     try {
-      const response = await client.say({
-        sentence: inputValue,
-      });
+      const headers = new Headers();
+      headers.set("Authorization", "Bearer MyNameIsTYZK");
+
+      // non-ASCIIな値を送る時は, base64エンコーディングが必要(gRPC-webとConnect)
+      // encodeBinaryHeaderは, messageもUTF-8 textも受け取れる
+      const data = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
+      headers.set("Data-Bin", encodeBinaryHeader(data));
+      headers.set("Message-Bin", encodeBinaryHeader(new SayRequest()));
+      headers.set("Greet-Emoji-Bin", encodeBinaryHeader("🤗"));
+
+      const response = await client.say(
+        {
+          sentence: inputValue,
+        },
+        {
+          headers: headers, // Connect headers are just HTTP headers.
+          onHeader: (headers) => {
+            console.log("received headers:", headers);
+
+            // binary headerを受け取る時
+            const binMessage = headers.get("Message-Bin");
+            if (binMessage != null) {
+              const message: SayRequest = decodeBinaryHeader(
+                binMessage,
+                SayRequest
+              );
+            }
+          },
+          onTrailer: (trailers) => console.log(trailers),
+        }
+      );
 
       setMessages((prev) => [
         ...prev,
