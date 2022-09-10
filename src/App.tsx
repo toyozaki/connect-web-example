@@ -5,7 +5,7 @@ import {
   createConnectTransport,
   createPromiseClient,
 } from "@bufbuild/connect-web";
-import { ElizaService } from "@buf/bufbuild_connect-web_bufbuild_eliza/buf/connect/demo/eliza/v1/eliza_connectweb";
+import { ElizaService } from "./gen/buf/connect/demo/eliza/v1/eliza_connectweb";
 
 const transport = createConnectTransport({
   baseUrl: "https://demo.connect.build",
