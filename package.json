@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "buf:generate": "buf generate buf.build/bufbuild/eliza"
+    "buf:generate-elisza": "buf generate buf.build/bufbuild/eliza",
+    "buf:generate-googleapis": "buf generate buf.build/googleapis/googleapis"
   },
   "dependencies": {
     "@bufbuild/connect-web": "^0.2.1",
